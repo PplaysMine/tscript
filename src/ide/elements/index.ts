@@ -1,6 +1,10 @@
 import { Interpreter } from "../../lang/interpreter/interpreter";
 import { ProgramRoot } from "../../lang/interpreter/program-elements";
-import { ParseInput, parseProgram } from "../../lang/parser";
+import {
+	ParseInput,
+	parseProgram,
+	StandardizedFilename,
+} from "../../lang/parser";
 import { toClipboard } from "../clipboard";
 import { icons } from "../icons";
 import * as tgui from "../tgui";
@@ -142,11 +146,17 @@ export function clear() {
 	updateProgramState({ interpreterChanged: true });
 }
 
+export type IncludeResolutionList = [
+	StandardizedFilename,
+	string,
+	StandardizedFilename
+][];
+
 /** @see createParseInput */
 export type ParseInputIncludeSpecification = {
 	parseInput: ParseInput;
-	includeResolutions: [string, string, string][] | null;
-	includeSourceResolutions: Map<string, string>;
+	includeResolutions: IncludeResolutionList | null;
+	includeSourceResolutions: Map<StandardizedFilename, string>;
 };
 
 /**
@@ -166,9 +176,12 @@ export type ParseInputIncludeSpecification = {
  *	`parseInput` is actually parsed.
  */
 export async function createParseInput(): Promise<ParseInputIncludeSpecification | null> {
-	const includeSourceResolutions: Map<string, string> = new Map();
+	const includeSourceResolutions: Map<StandardizedFilename, string> =
+		new Map();
 
-	const resolveInclude = (filename: string): ParseInput | null => {
+	const resolveInclude = (
+		filename: StandardizedFilename
+	): ParseInput | null => {
 		const source =
 			collection.getEditor(filename)?.editorView.text() ??
 			localStorage.getItem(`tscript.code.${filename}`);
