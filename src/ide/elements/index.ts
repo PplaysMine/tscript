@@ -190,7 +190,9 @@ export async function createParseInput(): Promise<ParseInputIncludeSpecification
 		return { source, filename, resolveInclude };
 	};
 
-	const mainParseInput = resolveInclude(getRunSelection());
+	const mainParseInput = resolveInclude(
+		getRunSelection() as StandardizedFilename
+	);
 	if (mainParseInput === null) return null;
 	return {
 		parseInput: mainParseInput,
