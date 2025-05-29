@@ -3,7 +3,7 @@ import { RuntimeError } from "../errors/RuntimeError";
 import { TScript } from "..";
 import { Typeid } from "../helpers/typeIds";
 import { ProgramRoot } from "./program-elements";
-import { StandardizedFilename } from "../parser";
+import { FileID } from "../parser";
 
 export interface InterpreterOptions {
 	/** @default 10000 */
@@ -442,7 +442,7 @@ export class Interpreter {
 	 *
 	 * @param lines one-based positions of breakpoints
 	 */
-	public defineBreakpoints(lines: Iterable<number>, filename: any) {
+	public defineBreakpoints(lines: Iterable<number>, filename: FileID) {
 		let pos = new Set<number>();
 		let changed = false;
 		const breakpoints = this.program.breakpoints[filename];
@@ -487,7 +487,7 @@ export class Interpreter {
 	 */
 	public toggleBreakpoint(
 		line: number,
-		filename: string
+		filename: FileID
 	): { line: number; active: boolean } | null {
 		const breakpoints = this.program.breakpoints[filename];
 		if (!breakpoints) return null;

@@ -3,7 +3,13 @@ import { ProgramRoot } from "../../lang/interpreter/program-elements";
 import {
 	ParseInput,
 	parseProgram,
-	StandardizedFilename,
+	FileID,
+	ProjectFileID,
+	projectFileIDToProjAbsPath,
+	LocalStorageFileID,
+	StringFileID,
+	fileIDChangeNamespace,
+	splitFileIDAtColon,
 } from "../../lang/parser";
 import { toClipboard } from "../clipboard";
 import { icons } from "../icons";
@@ -146,59 +152,70 @@ export function clear() {
 	updateProgramState({ interpreterChanged: true });
 }
 
-export type IncludeResolutionList = [
-	StandardizedFilename,
-	string,
-	StandardizedFilename
-][];
+export type IncludeResolutionList = [StringFileID, string, StringFileID][];
 
 /** @see createParseInput */
 export type ParseInputIncludeSpecification = {
-	parseInput: ParseInput;
-	includeResolutions: IncludeResolutionList | null;
-	includeSourceResolutions: Map<StandardizedFilename, string>;
+	includeResolutions: IncludeResolutionList;
+	includeSourceResolutions: Map<StringFileID, string>;
 };
 
 /**
  * Create ParseInput from the current editors
  *
- * @returns
- *	- `parseInput`: a ParseInput object
- *	- `includeResolutions`: array of triples `[includingFile, includeOperand,
+ * @returns `[parseInput, spec]`, where
+ *	- `spec.includeResolutions`: array of triples `[includingFile, includeOperand,
  *		resolvedFilename]`, meaning that that in `includingFile`, an include with
- *		operand `includeOperand` resolves to the file `resolvedFilename`. null
- *		if resolutions weren't used (i.e. the includeOperand is always the same
- *		as the resolvedFilename)
- *	- `includeSourceResolutions`: Map from resolved filenames (third entry in
+ *		operand `includeOperand` resolves to the file `resolvedFilename`.
+ *	- `spec.includeSourceResolutions`: Map from resolved filenames (third entry in
  *		includeResolutions triples) to their sources
  *	or null if the current run selection could not be resolved.
  *	`includeResolutions` and `includeSourceResolutions` will only be filled once
- *	`parseInput` is actually parsed.
+ *	`parseInput` is actually parsed. The FileIDs under `spec` have the "string"
+ *	namespace, regardless of the actual namespace the original files came from.
  */
-export async function createParseInput(): Promise<ParseInputIncludeSpecification | null> {
-	const includeSourceResolutions: Map<StandardizedFilename, string> =
-		new Map();
+export async function createParseInput(): Promise<
+	| [ParseInput<LocalStorageFileID, true>, ParseInputIncludeSpecification]
+	| null
+> {
+	const includeSourceResolutions: Map<StringFileID, string> = new Map();
+	const includeResolutions: [StringFileID, string, StringFileID][] = [];
 
+	const resolveIncludeToFileID = (
+		includingFile: LocalStorageFileID,
+		includeOperand: string
+	): LocalStorageFileID => {
+		includeResolutions.push([
+			fileIDChangeNamespace(includingFile, "string"),
+			includeOperand,
+			`string:${includeOperand}`,
+		]);
+		return `localstorage:${includeOperand}`;
+	};
 	const resolveInclude = (
-		filename: StandardizedFilename
-	): ParseInput | null => {
+		fileID: LocalStorageFileID
+	): ParseInput<LocalStorageFileID, true> | null => {
+		const filename = splitFileIDAtColon(fileID)[1];
 		const source =
-			collection.getEditor(filename)?.editorView.text() ??
+			collection.getEditor(filename)?.editorView?.text() ??
 			localStorage.getItem(`tscript.code.${filename}`);
 		if (source === null) return null;
-		includeSourceResolutions.set(filename, source);
-		return { source, filename, resolveInclude };
+		includeSourceResolutions.set(
+			fileIDChangeNamespace(fileID, "string"),
+			source
+		);
+		return {
+			source,
+			filename: fileID,
+			resolveInclude,
+			resolveIncludeToFileID,
+		};
 	};
 
-	const mainParseInput = resolveInclude(
-		getRunSelection() as StandardizedFilename
-	);
+	const entryFilename = getRunSelection();
+	const mainParseInput = resolveInclude(`localstorage:${entryFilename}`);
 	if (mainParseInput === null) return null;
-	return {
-		parseInput: mainParseInput,
-		includeSourceResolutions,
-		includeResolutions: null,
-	};
+	return [mainParseInput, { includeSourceResolutions, includeResolutions }];
 }
 
 /**
@@ -207,7 +224,7 @@ export async function createParseInput(): Promise<ParseInputIncludeSpecification
  * @param onPrepared called with InterpreterSession/null once ready.
  */
 export async function prepareRun(): Promise<InterpreterSession | null> {
-	const parseInput = (await createParseInput())?.parseInput;
+	const parseInput = (await createParseInput())?.[0];
 	if (!parseInput) {
 		return null;
 	}

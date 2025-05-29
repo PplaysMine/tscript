@@ -145,7 +145,7 @@ export class EditorController {
 			// ask the interpreter for the correct position of the marker
 			const result = interpreter.toggleBreakpoint(
 				line + 1,
-				this.#filename
+				this.#filename as any
 			);
 			if (result !== null) {
 				line = result.line - 1;
@@ -168,7 +168,7 @@ export class EditorController {
 		const result = session.interpreter.defineBreakpoints(
 			// convert to one-based line indices
 			Array.from(this.#breakpoints, (line) => line + 1),
-			this.#filename
+			this.#filename as any
 		);
 		if (result) {
 			this.#breakpoints.clear();

@@ -138,13 +138,10 @@ async function cmd_step_out() {
 export async function cmd_export() {
 	const resolveEntryRes = await ide.createParseInput();
 	if (!resolveEntryRes) return;
+	const [mainEntry, includeResolutions] = resolveEntryRes;
 
 	// check that the code at least compiles
-	let result = await parseProgram(
-		resolveEntryRes.parseInput,
-		true,
-		parseOptions
-	);
+	let result = await parseProgram(mainEntry, true, parseOptions);
 
 	// everything after that should ideally be synchronous
 	ide.clear();
@@ -176,7 +173,7 @@ export async function cmd_export() {
 	}
 
 	// create a filename for the file download from the title
-	let title = resolveEntryRes.parseInput.filename;
+	let title = mainEntry.filename;
 	let fn = "tscript-export";
 	if (
 		!fn.endsWith("html") &&
@@ -223,10 +220,10 @@ export async function cmd_export() {
 
 	const standaloneCode: StandaloneCode = {
 		includeSourceResolutions: Object.fromEntries(
-			resolveEntryRes.includeSourceResolutions.entries()
+			includeResolutions.includeSourceResolutions.entries()
 		),
-		includeResolutions: resolveEntryRes.includeResolutions,
-		main: resolveEntryRes.parseInput.filename,
+		includeResolutions: includeResolutions.includeResolutions,
+		main: mainEntry.filename,
 	};
 	// escape the TScript source code; prepare it to reside inside an html document
 	let source = JSON.stringify(standaloneCode);
