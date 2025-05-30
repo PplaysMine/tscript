@@ -40,14 +40,15 @@ export function importData(text: string, filename?: string) {
 	if (filename) {
 		const isSavedDoc =
 			localStorage.getItem("tscript.code." + filename) !== null;
-		if (!isSavedDoc && !ide.collection.getEditor(filename)) {
-			ide.collection.openEditorFromData(filename, text);
+		const fileID = `localstorage:${filename}` as const;
+		if (!isSavedDoc && !ide.collection.getEditor(fileID)) {
+			ide.collection.openEditorFromData(fileID, text);
 			return;
 		}
 	}
 
 	fileDlg("Save file as ...", filename ?? "", true, "Save", (filename) => {
 		// the user has chosen, replace existing files
-		ide.collection.openEditorFromData(filename, text);
+		ide.collection.openEditorFromData(`localstorage:${filename}`, text);
 	});
 }

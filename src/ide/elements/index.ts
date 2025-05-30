@@ -10,6 +10,11 @@ import {
 	StringFileID,
 	fileIDChangeNamespace,
 	splitFileIDAtColon,
+	fileIDHasNamespace,
+	LoadableFileID,
+	localStorageFileIDToFilename,
+	projectFileIDTripleSplit,
+	isLoadableFileID,
 } from "../../lang/parser";
 import { toClipboard } from "../clipboard";
 import { icons } from "../icons";
@@ -71,7 +76,7 @@ export let tab_config: { align: "horizontal" | "vertical" } = {
 export function addMessage(
 	type: "print" | "warning" | "error",
 	text: string,
-	filename?: string,
+	filename?: FileID,
 	line?: number,
 	ch?: number,
 	href?: string
@@ -118,7 +123,7 @@ export function addMessage(
 				(type !== "print" ? " ide-errormessage" : ""),
 			text: s,
 		});
-		if (filename && line != null) {
+		if (filename && line != null && isLoadableFileID(filename)) {
 			msg.addEventListener("click", (event) => {
 				event.preventDefault();
 				collection.openEditorFromFile(filename!, {
@@ -197,7 +202,7 @@ export async function createParseInput(): Promise<
 	): ParseInput<LocalStorageFileID, true> | null => {
 		const filename = splitFileIDAtColon(fileID)[1];
 		const source =
-			collection.getEditor(filename)?.editorView?.text() ??
+			collection.getEditor(fileID)?.editorView?.text() ??
 			localStorage.getItem(`tscript.code.${filename}`);
 		if (source === null) return null;
 		includeSourceResolutions.set(
@@ -306,7 +311,7 @@ export class InterpreterSession {
 		};
 		interpreter.service.message = (
 			msg: string,
-			filename?: string,
+			filename?: FileID,
 			line?: number,
 			ch?: number,
 			href?: string
@@ -716,8 +721,8 @@ export function create(container: HTMLElement, options?: any) {
 		runselector.value = config.main;
 	}
 	if (!collection.activeEditor) {
-		if (!collection.openEditorFromFile("Main"))
-			collection.openEditorFromData("Main", "");
+		if (!collection.openEditorFromFile("localstorage:Main"))
+			collection.openEditorFromData("localstorage:Main", "");
 	}
 
 	let panel_messages = tgui.createPanel({
@@ -827,6 +832,6 @@ export function create(container: HTMLElement, options?: any) {
 /**
  * Returns the current filename, selected in the run-selector
  */
-export function getRunSelection() {
-	return runselector.value;
+export function getRunSelection(): FileID {
+	return runselector.value as FileID;
 }

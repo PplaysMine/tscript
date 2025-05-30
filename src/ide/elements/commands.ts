@@ -1,8 +1,17 @@
 import * as ide from ".";
-import { parseProgram } from "../../lang/parser";
+import {
+	fileIDHasNamespace,
+	fileIDToContextDependentFilename,
+	LocalStorageFileID,
+	localStorageFileIDToFilename,
+	parseProgram,
+	projectFileIDToProjAbsPath,
+	splitFileIDAtColon,
+} from "../../lang/parser";
 import { icons } from "../icons";
 import { type StandaloneCode } from "../standalone";
 import * as tgui from "./../tgui";
+import { errorMsgBox, msgBox } from "./../tgui";
 import {
 	confirmFileOverwrite,
 	fileDlg,
@@ -303,13 +312,14 @@ function cmd_new() {
 		const isSavedDoc =
 			localStorage.getItem("tscript.code." + name) !== null;
 
-		if (isSavedDoc || ide.collection.getEditor(name)) {
+		const fileID = `localstorage:${name}` as const;
+		if (isSavedDoc || ide.collection.getEditor(fileID)) {
 			confirmFileOverwrite(name, () => {
 				// replace the existing file/editor
-				ide.collection.openEditorFromData(name, "");
+				ide.collection.openEditorFromData(fileID, "");
 			});
 		} else {
-			ide.collection.openEditorFromData(name, "");
+			ide.collection.openEditorFromData(fileID, "");
 		}
 
 		return false;
@@ -318,7 +328,7 @@ function cmd_new() {
 
 function cmd_load() {
 	fileDlg("Load file", "", false, "Load", (name) => {
-		ide.collection.openEditorFromFile(name);
+		ide.collection.openEditorFromFile(`localstorage:${name}`);
 	});
 }
 
@@ -336,7 +346,7 @@ function cmd_save_as() {
 		true,
 		"Save",
 		(filename) => {
-			controller.saveAs(filename);
+			controller.saveAs(`localstorage:${filename}`);
 		}
 	);
 }
@@ -366,7 +376,7 @@ export function cmd_upload() {
 export function cmd_download() {
 	const controller = ide.collection.activeEditor;
 	if (!controller) return;
-	const filename = controller.filename;
+	const filename = fileIDToContextDependentFilename(controller.filename);
 	const content = controller.editorView.text();
 
 	const link = tgui.createElement({

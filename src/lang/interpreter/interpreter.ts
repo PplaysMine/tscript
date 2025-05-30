@@ -442,10 +442,10 @@ export class Interpreter {
 	 *
 	 * @param lines one-based positions of breakpoints
 	 */
-	public defineBreakpoints(lines: Iterable<number>, filename: FileID) {
+	public defineBreakpoints(lines: Iterable<number>, fileID: FileID) {
 		let pos = new Set<number>();
 		let changed = false;
-		const breakpoints = this.program.breakpoints[filename];
+		const breakpoints = this.program.breakpoints[fileID];
 		if (!breakpoints) return null;
 
 		// loop over all positions

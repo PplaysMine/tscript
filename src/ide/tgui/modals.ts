@@ -430,3 +430,10 @@ export function stopModal(dialog?: Modal) {
 	if (modal.length == 0) document.body.removeChild(separator);
 	else modal[modal.length - 1].dom.style.zIndex = 100;
 }
+
+export function errorMsgBox(text: string) {
+	msgBox({
+		title: "Error",
+		prompt: text,
+	});
+}

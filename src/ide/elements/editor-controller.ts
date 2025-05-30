@@ -1,3 +1,4 @@
+import { FileID, splitFileIDAtColon } from "../../lang/parser";
 import { Editor } from "../editor";
 import * as tgui from "../tgui";
 import { confirmFileDiscard } from "./dialogs";
@@ -11,7 +12,7 @@ export interface NavigationRequest {
 }
 
 export interface EditorControllerOptions {
-	filename: string;
+	filename: FileID;
 	text: string;
 
 	/** called whenever the editor wants to be activated */
@@ -21,7 +22,7 @@ export interface EditorControllerOptions {
 	onClosed: () => void;
 
 	/** called before {@link EditorController.filename} changes */
-	onBeforeFilenameChange: (newFilename: string) => void;
+	onBeforeFilenameChange: (newFilename: FileID) => void;
 }
 
 export class EditorController {
@@ -34,8 +35,8 @@ export class EditorController {
 	readonly #breakpoints = new Set<number>();
 
 	readonly #onActivate: () => void;
-	readonly #onBeforeFilenameChange: (newFilename: string) => void;
-	#filename: string;
+	readonly #onBeforeFilenameChange: (newFilename: FileID) => void;
+	#filename: FileID;
 
 	readonly close: () => void;
 
@@ -119,7 +120,7 @@ export class EditorController {
 		};
 	}
 
-	get filename(): string {
+	get filename(): FileID {
 		return this.#filename;
 	}
 
@@ -145,7 +146,7 @@ export class EditorController {
 			// ask the interpreter for the correct position of the marker
 			const result = interpreter.toggleBreakpoint(
 				line + 1,
-				this.#filename as any
+				this.#filename
 			);
 			if (result !== null) {
 				line = result.line - 1;
@@ -168,7 +169,7 @@ export class EditorController {
 		const result = session.interpreter.defineBreakpoints(
 			// convert to one-based line indices
 			Array.from(this.#breakpoints, (line) => line + 1),
-			this.#filename as any
+			this.#filename
 		);
 		if (result) {
 			this.#breakpoints.clear();
@@ -177,7 +178,7 @@ export class EditorController {
 		}
 	}
 
-	saveAs(filename: string) {
+	saveAs(filename: FileID) {
 		this.#onBeforeFilenameChange(filename);
 
 		this.tabLabel.innerText = filename;
@@ -189,10 +190,10 @@ export class EditorController {
 	}
 
 	save() {
-		localStorage.setItem(
-			"tscript.code." + this.filename,
-			this.editorView.text()
-		);
+		const [ns, suffix] = splitFileIDAtColon(this.filename);
+		if (ns !== "localstorage")
+			throw new Error("Saving only supported for files in localStorage");
+		localStorage.setItem("tscript.code." + suffix, this.editorView.text());
 		this.editorView.setClean();
 	}
 }
