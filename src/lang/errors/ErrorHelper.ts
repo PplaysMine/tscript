@@ -1,3 +1,4 @@
+import { FileID } from "../parser";
 import { AssertionError } from "./AssertionError";
 import { RuntimeError } from "./RuntimeError";
 
@@ -34,7 +35,7 @@ export class ErrorHelper {
 		path,
 		args: Array<any> | undefined = undefined,
 		stack: any = undefined,
-		_filename: string | undefined = undefined,
+		_filename: FileID | undefined = undefined,
 		_line: number | undefined = undefined,
 		_ch: number | undefined = undefined
 	) {
@@ -46,7 +47,7 @@ export class ErrorHelper {
 
 		let message = ErrorHelper.composeError(path, args);
 		let href = "#/errors" + path;
-		let filename: any = null,
+		let filename: FileID | null = null,
 			line: any = null,
 			ch: any = null;
 
@@ -73,7 +74,7 @@ export class ErrorHelper {
 			}
 			if (line !== null) break;
 		}
-		return new RuntimeError(message, filename, line, ch, href);
+		return new RuntimeError(message, filename ?? undefined, line, ch, href);
 	}
 	// raise a fatal runtime error, preserve the interpreter state for debugging
 	public static error(
