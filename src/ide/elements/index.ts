@@ -218,7 +218,8 @@ export async function createParseInput(): Promise<
 	};
 
 	const entryFilename = getRunSelection();
-	const mainParseInput = resolveInclude(`localstorage:${entryFilename}`);
+	if (!fileIDHasNamespace(entryFilename, "localstorage")) return null;
+	const mainParseInput = resolveInclude(entryFilename);
 	if (mainParseInput === null) return null;
 	return [mainParseInput, { includeSourceResolutions, includeResolutions }];
 }
