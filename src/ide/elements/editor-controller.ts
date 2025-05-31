@@ -1,4 +1,8 @@
-import { FileID, splitFileIDAtColon } from "../../lang/parser";
+import {
+	FileID,
+	fileIDToHumanFriendly,
+	splitFileIDAtColon,
+} from "../../lang/parser";
 import { Editor } from "../editor";
 import * as tgui from "../tgui";
 import { confirmFileDiscard } from "./dialogs";
@@ -51,6 +55,7 @@ export class EditorController {
 		this.#onActivate = onActivate;
 		this.close = onClosed;
 		this.#onBeforeFilenameChange = onBeforeFilenameChange;
+		const humanFriendlyName = fileIDToHumanFriendly(filename);
 
 		// create tab
 		this.tab = tgui.createElement({
@@ -61,7 +66,7 @@ export class EditorController {
 			(this.tabLabel = tgui.createElement({
 				type: "span",
 				classname: "name",
-				text: filename,
+				text: humanFriendlyName,
 				click: () => onActivate(),
 			})),
 			tgui.createElement({
@@ -80,7 +85,7 @@ export class EditorController {
 		this.runOption = tgui.createElement({
 			type: "option",
 			properties: { value: filename },
-			text: filename,
+			text: humanFriendlyName,
 		});
 
 		// create editor view
