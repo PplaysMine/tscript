@@ -24,7 +24,7 @@ export type StandaloneCode = {
 	 */
 	includeResolutions: IncludeResolutionList;
 	/** standardized filename of entry point file */
-	main: FileID;
+	main: StringFileID;
 };
 export type StandaloneData = {
 	code: StandaloneCode;
@@ -63,7 +63,7 @@ export function showStandalonePage(
 			resolveInclude: getParseInput,
 		};
 	}
-	const mainFile = getParseInput(stringFileID(data.code.main));
+	const mainFile = getParseInput(data.code.main);
 	if (!mainFile) return; // This has been validated on export
 
 	const { program } = parseProgram(mainFile, false);

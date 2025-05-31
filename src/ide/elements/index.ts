@@ -161,18 +161,23 @@ export type IncludeResolutionList = [StringFileID, string, StringFileID][];
 export type ParseInputIncludeSpecification = {
 	includeResolutions: IncludeResolutionList;
 	includeSourceResolutions: Map<StringFileID, string>;
+	main: StringFileID;
 };
 
 /**
  * Create ParseInput from the current editors
  *
- * @returns `[parseInput, spec]`, where
+ * @returns null if the current run selection could not be resolved, otherwise
+ * `[parseInput, spec]`. `parseInput` is the entry point of the program. `spec`
+ * stores the content of the parsed
+ * inputs, how they are included, and which one is the entry point. This is used
+ * for serializing the program for creating the standalone page.
  *	- `spec.includeResolutions`: array of triples `[includingFile, includeOperand,
  *		resolvedFilename]`, meaning that that in `includingFile`, an include with
  *		operand `includeOperand` resolves to the file `resolvedFilename`.
  *	- `spec.includeSourceResolutions`: Map from resolved filenames (third entry in
  *		includeResolutions triples) to their sources
- *	or null if the current run selection could not be resolved.
+ *	- `spec.mainEntry`: main file/entry point
  *	`includeResolutions` and `includeSourceResolutions` will only be filled once
  *	`parseInput` is actually parsed. The FileIDs under `spec` have the "string"
  *	namespace, regardless of the actual namespace the original files came from.
@@ -219,7 +224,14 @@ export async function createParseInput(): Promise<
 	if (!fileIDHasNamespace(entryFilename, "localstorage")) return null;
 	const mainParseInput = resolveInclude(entryFilename);
 	if (mainParseInput === null) return null;
-	return [mainParseInput, { includeSourceResolutions, includeResolutions }];
+	return [
+		mainParseInput,
+		{
+			includeSourceResolutions,
+			includeResolutions,
+			main: fileIDChangeNamespace(entryFilename, "string"),
+		},
+	];
 }
 
 /**
