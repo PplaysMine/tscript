@@ -1,7 +1,9 @@
 import * as ide from ".";
 import { ErrorHelper } from "../../lang/errors/ErrorHelper";
 import {
+	fileIDChangeNamespace,
 	fileIDToContextDependentFilename,
+	localstorageFileID,
 	parseProgram,
 } from "../../lang/parser";
 import { icons } from "../icons";
@@ -312,7 +314,7 @@ function cmd_new() {
 		const isSavedDoc =
 			localStorage.getItem("tscript.code." + name) !== null;
 
-		const fileID = `localstorage:${name}` as const;
+		const fileID = localstorageFileID(name);
 		if (isSavedDoc || ide.collection.getEditor(fileID)) {
 			confirmFileOverwrite(name, () => {
 				// replace the existing file/editor
@@ -328,7 +330,7 @@ function cmd_new() {
 
 function cmd_load() {
 	fileDlg("Load file", "", false, "Load", (name) => {
-		ide.collection.openEditorFromFile(`localstorage:${name}`);
+		ide.collection.openEditorFromFile(localstorageFileID(name));
 	});
 }
 
@@ -346,7 +348,7 @@ function cmd_save_as() {
 		true,
 		"Save",
 		(filename) => {
-			controller.saveAs(`localstorage:${filename}`);
+			controller.saveAs(localstorageFileID(filename));
 		}
 	);
 }

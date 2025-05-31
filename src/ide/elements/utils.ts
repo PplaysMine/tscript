@@ -1,5 +1,6 @@
 import * as ide from ".";
 import { Interpreter } from "../../lang/interpreter/interpreter";
+import { localstorageFileID } from "../../lang/parser";
 import { fileDlg } from "./dialogs";
 
 export const type2css = [
@@ -40,7 +41,7 @@ export function importData(text: string, filename?: string) {
 	if (filename) {
 		const isSavedDoc =
 			localStorage.getItem("tscript.code." + filename) !== null;
-		const fileID = `localstorage:${filename}` as const;
+		const fileID = localstorageFileID(filename);
 		if (!isSavedDoc && !ide.collection.getEditor(fileID)) {
 			ide.collection.openEditorFromData(fileID, text);
 			return;
@@ -49,6 +50,6 @@ export function importData(text: string, filename?: string) {
 
 	fileDlg("Save file as ...", filename ?? "", true, "Save", (filename) => {
 		// the user has chosen, replace existing files
-		ide.collection.openEditorFromData(`localstorage:${filename}`, text);
+		ide.collection.openEditorFromData(localstorageFileID(filename), text);
 	});
 }

@@ -165,6 +165,14 @@ export function isLoadableFileID(fileID: FileID): fileID is LoadableFileID {
 	);
 }
 
+export function localstorageFileID(filename: string): LocalStorageFileID {
+	return `localstorage:${filename}`;
+}
+
+export function stringFileID(filename: string): StringFileID {
+	return `string:${filename}`;
+}
+
 /**
  * Given a file id, returns a string that unambiguously represents that file to
  * the user, but leaving out the namespace (and in future uses, other contexts
@@ -270,7 +278,7 @@ export function parseProgramFromString(
 ): ParseResult {
 	return parseProgram(
 		{
-			filename: "string:main",
+			filename: stringFileID("main"),
 			source,
 			resolveInclude: () => null,
 			resolveIncludeToFileID: () => null,

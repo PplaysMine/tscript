@@ -11,6 +11,8 @@ import {
 	splitFileIDAtColon,
 	fileIDHasNamespace,
 	isLoadableFileID,
+	localstorageFileID,
+	stringFileID,
 } from "../../lang/parser";
 import { toClipboard } from "../clipboard";
 import { icons } from "../icons";
@@ -189,9 +191,9 @@ export async function createParseInput(): Promise<
 		includeResolutions.push([
 			fileIDChangeNamespace(includingFile, "string"),
 			includeOperand,
-			`string:${includeOperand}`,
+			stringFileID(includeOperand),
 		]);
-		return `localstorage:${includeOperand}`;
+		return localstorageFileID(includeOperand);
 	};
 	const resolveInclude = (
 		fileID: LocalStorageFileID
@@ -722,8 +724,9 @@ export function create(container: HTMLElement, options?: any) {
 		runselector.value = config.main;
 	}
 	if (!collection.activeEditor) {
-		if (!collection.openEditorFromFile("localstorage:Main"))
-			collection.openEditorFromData("localstorage:Main", "");
+		const fileID = localstorageFileID("Main");
+		if (!collection.openEditorFromFile(fileID))
+			collection.openEditorFromData(fileID, "");
 	}
 
 	let panel_messages = tgui.createPanel({
