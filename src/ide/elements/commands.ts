@@ -11,7 +11,7 @@ import {
 import { icons } from "../icons";
 import { type StandaloneCode } from "../standalone";
 import * as tgui from "./../tgui";
-import { errorMsgBox, msgBox } from "./../tgui";
+import { msgBox } from "./../tgui";
 import {
 	confirmFileOverwrite,
 	fileDlg,
