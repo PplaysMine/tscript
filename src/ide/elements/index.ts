@@ -5,18 +5,12 @@ import {
 	ParseInput,
 	parseProgram,
 	FileID,
-	ProjectFileID,
-	projectFileIDToProjAbsPath,
 	LocalStorageFileID,
 	StringFileID,
 	fileIDChangeNamespace,
 	splitFileIDAtColon,
 	fileIDHasNamespace,
-	LoadableFileID,
-	localStorageFileIDToFilename,
-	projectFileIDTripleSplit,
 	isLoadableFileID,
-	fileIDToContextDependentFilename,
 } from "../../lang/parser";
 import { toClipboard } from "../clipboard";
 import { icons } from "../icons";

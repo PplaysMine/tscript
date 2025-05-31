@@ -1,12 +1,8 @@
 import {
 	FileID,
-	fileIDHasNamespace,
-	fileIDToContextDependentFilename,
 	fileIDToHumanFriendly,
 	isLoadableFileID,
 	LoadableFileID,
-	LocalStorageFileID,
-	ProjectFileID,
 	defaultParseOptions,
 	ParseOptions,
 } from "../../lang/parser";

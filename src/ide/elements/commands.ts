@@ -1,13 +1,8 @@
 import * as ide from ".";
 import { ErrorHelper } from "../../lang/errors/ErrorHelper";
 import {
-	fileIDHasNamespace,
 	fileIDToContextDependentFilename,
-	LocalStorageFileID,
-	localStorageFileIDToFilename,
 	parseProgram,
-	projectFileIDToProjAbsPath,
-	splitFileIDAtColon,
 } from "../../lang/parser";
 import { icons } from "../icons";
 import { type StandaloneCode } from "../standalone";
