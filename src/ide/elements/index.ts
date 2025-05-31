@@ -1,3 +1,4 @@
+import { ErrorHelper } from "../../lang/errors/ErrorHelper";
 import { Interpreter } from "../../lang/interpreter/interpreter";
 import { ProgramRoot } from "../../lang/interpreter/program-elements";
 import {
@@ -249,16 +250,14 @@ export async function prepareRun(): Promise<InterpreterSession | null> {
 
 	clear();
 	for (const err of errors) {
-		const humandReadable =
-			err.filename && fileIDToContextDependentFilename(err.filename);
 		addMessage(
 			err.type,
-			err.type +
-				(humandReadable ? " in file '" + humandReadable + "'" : "") +
-				" in line " +
-				err.line +
-				": " +
-				err.message,
+			ErrorHelper.getLocatedErrorMsg(
+				err.type,
+				err.filename ?? undefined,
+				err.line,
+				err.message
+			),
 			err.filename ?? undefined,
 			err.line,
 			err.ch,

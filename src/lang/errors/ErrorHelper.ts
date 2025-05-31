@@ -1,4 +1,4 @@
-import { FileID } from "../parser";
+import { FileID, fileIDToContextDependentFilename } from "../parser";
 import { AssertionError } from "./AssertionError";
 import { RuntimeError } from "./RuntimeError";
 
@@ -29,6 +29,22 @@ export class ErrorHelper {
 		let ret = tokens[0];
 		for (let i = 0; i < args.length; i++) ret += args[i] + tokens[i + 1];
 		return ret;
+	}
+
+	public static getLocatedErrorMsg(
+		errorType: string,
+		fileID: FileID | undefined,
+		line: number | undefined,
+		msg: string
+	): string {
+		const humanReadable =
+			fileID !== undefined && fileIDToContextDependentFilename(fileID);
+		return (
+			errorType +
+			(humanReadable ? ` in file '${humanReadable}'` : "") +
+			(line ? ` in line ${line}` : "") +
+			`: ${msg}`
+		);
 	}
 
 	public static getError(

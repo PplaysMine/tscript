@@ -312,12 +312,12 @@ export class Interpreter {
 					const ch = pe?.where?.ch || ex.ch;
 
 					this.service.message(
-						"runtime error " +
-							(filename ? "in file '" + filename + "' " : "") +
-							"in line " +
-							line +
-							": " +
-							ex.message,
+						ErrorHelper.getLocatedErrorMsg(
+							"runtime error",
+							filename,
+							line,
+							ex.message
+						),
 						filename,
 						line,
 						ch,
