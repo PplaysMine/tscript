@@ -293,8 +293,8 @@ function mouseEventData(event: MouseEvent, button?: string) {
 	const el = event.currentTarget as HTMLElement;
 	const canvasRect = el.getBoundingClientRect();
 	return {
-		x: event.clientX - canvasRect.x,
-		y: event.clientY - canvasRect.y,
+		x: Math.round(event.clientX - canvasRect.x),
+		y: Math.round(event.clientY - canvasRect.y),
 		button,
 		buttons: buttonNames(event.buttons),
 		shift: event.shiftKey,
